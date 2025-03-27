@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curtidas com localStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #nomeInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        #curtirBtn {
+            background-color: #4267B2;
+            color: white;
+        }
+        #curtirBtn:hover {
+            background-color: #365899;
+        }
+        #limparBtn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        #limparBtn:hover {
+            background-color: #c0392b;
+        }
+        #listaCurtidas {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 50px;
+        }
+        .mensagem-vazia {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Curta esta página</h1>
+    
+    <div class="input-container">
+        <input type="text" id="nomeInput" placeholder="Digite seu nome">
+        <button id="curtirBtn">Curtir</button>
+        <button id="limparBtn">Limpar</button>
+    </div>
+    
+    <div id="listaCurtidas" class="mensagem-vazia">Ninguém curtiu</div>
+
+    <script>
+        // Elementos do DOM
+        const nomeInput = document.getElementById('nomeInput');
+        const curtirBtn = document.getElementById('curtirBtn');
+        const limparBtn = document.getElementById('limparBtn');
+        const listaCurtidas = document.getElementById('listaCurtidas');
+        
+        // Carrega os dados do localStorage ou inicializa array vazio
+        let pessoasQueCurtiram = JSON.parse(localStorage.getItem('curtidas')) || [];
+        
+        // Atualiza a exibição inicial
+        atualizarExibicaoCurtidas();
+        
+        // Função para atualizar a exibição das curtidas
+        function atualizarExibicaoCurtidas() {
+            const quantidade = pessoasQueCurtiram.length;
+            
+            if (quantidade === 0) {
+                listaCurtidas.textContent = "Ninguém curtiu";
+                listaCurtidas.className = "mensagem-vazia";
+            } else if (quantidade === 1) {
+                listaCurtidas.textContent = `${pessoasQueCurtiram[0]} curtiu`;
+                listaCurtidas.className = "";
+            } else if (quantidade === 2) {
+                listaCurtidas.textContent = `${pessoasQueCurtiram[0]} e ${pessoasQueCurtiram[1]} curtiram`;
+                listaCurtidas.className = "";
+            } else {
+                listaCurtidas.textContent = `${pessoasQueCurtiram[0]}, ${pessoasQueCurtiram[1]} e mais ${quantidade - 2} pessoas curtiram`;
+                listaCurtidas.className = "";
+            }
+        }
+        
+        // Função para salvar no localStorage
+        function salvarNoLocalStorage() {
+            localStorage.setItem('curtidas', JSON.stringify(pessoasQueCurtiram));
+        }
+        
+        // Event listener para o botão curtir
+        curtirBtn.addEventListener('click', function() {
+            const nome = nomeInput.value.trim();
+            
+            if (nome === '') {
+                alert('Por favor, digite um nome antes de curtir.');
+                return;
+            }
+            
+            // Verifica se o nome já está na lista
+            if (!pessoasQueCurtiram.includes(nome)) {
+                pessoasQueCurtiram.push(nome);
+                salvarNoLocalStorage();
+                atualizarExibicaoCurtidas();
+                nomeInput.value = ''; // Limpa o campo após curtir
+            } else {
+                alert('Você já curtiu esta página!');
+            }
+        });
+        
+        // Event listener para o botão limpar
+        limparBtn.addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja limpar todas as curtidas?')) {
+                pessoasQueCurtiram = [];
+                localStorage.removeItem('curtidas');
+                atualizarExibicaoCurtidas();
+            }
+        });
+        
+        // Opcional: permitir curtir pressionando Enter
+        nomeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                curtirBtn.click();
+            }
+        });
+    </script>
+</body>
