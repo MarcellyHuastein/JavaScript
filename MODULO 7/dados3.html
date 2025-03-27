@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca de Usuários do GitHub</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #24292e;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        #searchInput {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        #searchButton {
+            padding: 12px 24px;
+            background-color: #2ea44f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        #searchButton:hover {
+            background-color: #22863a;
+        }
+        .user-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .user-card {
+            background-color: white;
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #24292e;
+        }
+        .user-login {
+            color: #586069;
+            margin-bottom: 5px;
+        }
+        .user-link {
+            color: #0366d6;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .user-link:hover {
+            text-decoration: underline;
+        }
+        .no-results {
+            text-align: center;
+            color: #586069;
+            font-size: 18px;
+            padding: 40px;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <h1>Busca de Usuários do GitHub</h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Digite o nome de um usuário do GitHub">
+        <button id="searchButton">Buscar</button>
+    </div>
+    
+    <div id="resultsContainer">
+        <div class="no-results">Digite um nome de usuário e clique em Buscar</div>
+    </div>
+
+    <script>
+        // Elementos do DOM
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const resultsContainer = document.getElementById('resultsContainer');
+        
+        // Função para buscar usuários na API do GitHub
+        async function searchGitHubUsers(username) {
+            try {
+                // Mostra mensagem de carregamento
+                resultsContainer.innerHTML = '<div class="loading">Buscando usuários...</div>';
+                
+                // Faz a requisição para a API do GitHub
+                const response = await fetch(`https://api.github.com/search/users?q=${encodeURIComponent(username)}`);
+                
+                // Verifica se a resposta foi bem sucedida
+                if (!response.ok) {
+                    throw new Error('Erro na requisição');
+                }
+                
+                const data = await response.json();
+                
+                // Exibe os resultados
+                displayResults(data.items);
+            } catch (error) {
+                console.error('Erro ao buscar usuários:', error);
+                resultsContainer.innerHTML = '<div class="no-results">Ocorreu um erro ao buscar usuários</div>';
+            }
+        }
+        
+        // Função para exibir os resultados
+        function displayResults(users) {
+            if (!users || users.length === 0) {
+                resultsContainer.innerHTML = '<div class="no-results">Não foram encontrados usuários para esta pesquisa</div>';
+                return;
+            }
+            
+            // Cria o HTML para cada usuário encontrado
+            const usersHTML = users.map(user => `
+                <div class="user-card">
+                    <img src="${user.avatar_url}" alt="${user.login}" class="user-avatar">
+                    <div class="user-info">
+                        <div class="user-name">${user.name || 'Nome não disponível'}</div>
+                        <div class="user-login">@${user.login}</div>
+                        <a href="${user.html_url}" target="_blank" class="user-link">Ver perfil</a>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Atualiza o container com os resultados
+            resultsContainer.innerHTML = `<div class="user-list">${usersHTML}</div>`;
+        }
+        
+        // Event listener para o botão de busca
+        searchButton.addEventListener('click', () => {
+            const username = searchInput.value.trim();
+            
+            if (username === '') {
+                alert('Por favor, digite um nome de usuário para buscar');
+                return;
+            }
+            
+            searchGitHubUsers(username);
+        });
+        
+        // Opcional: permitir buscar pressionando Enter
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
