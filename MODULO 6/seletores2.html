@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curtidas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        #listaCurtidas {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Curta esta página</h1>
+    
+    <div>
+        <label for="nome">Seu nome:</label>
+        <input type="text" id="nome" placeholder="Digite seu nome">
+        <button id="curtirBtn">Curtir</button>
+    </div>
+    
+    <p id="listaCurtidas">Ninguém curtiu</p>
+
+    <script>
+        // Array para armazenar os nomes que curtiram
+        const pessoasQueCurtiram = [];
+        
+        // Elementos do DOM
+        const nomeInput = document.getElementById('nome');
+        const curtirBtn = document.getElementById('curtirBtn');
+        const listaCurtidas = document.getElementById('listaCurtidas');
+        
+        // Função para atualizar o texto das curtidas
+        function atualizarTextoCurtidas() {
+            const quantidade = pessoasQueCurtiram.length;
+            
+            if (quantidade === 0) {
+                listaCurtidas.textContent = "Ninguém curtiu";
+            } else if (quantidade === 1) {
+                listaCurtidas.textContent = `${pessoasQueCurtiram[0]} curtiu`;
+            } else if (quantidade === 2) {
+                listaCurtidas.textContent = `${pessoasQueCurtiram[0]} e ${pessoasQueCurtiram[1]} curtiram`;
+            } else {
+                listaCurtidas.textContent = `${pessoasQueCurtiram[0]}, ${pessoasQueCurtiram[1]} e mais ${quantidade - 2} pessoas curtiram`;
+            }
+        }
+        
+        // Event listener para o botão curtir
+        curtirBtn.addEventListener('click', function() {
+            const nome = nomeInput.value.trim();
+            
+            if (nome === '') {
+                alert('Por favor, digite um nome antes de curtir.');
+                return;
+            }
+            
+            // Verifica se o nome já está na lista
+            if (!pessoasQueCurtiram.includes(nome)) {
+                pessoasQueCurtiram.push(nome);
+                atualizarTextoCurtidas();
+                nomeInput.value = ''; // Limpa o campo após curtir
+            } else {
+                alert('Você já curtiu esta página!');
+            }
+        });
+        
+        // Opcional: permitir curtir pressionando Enter
+        nomeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                curtirBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
